@@ -48,7 +48,7 @@ XDebug actions:
 ## Session based debugging
 
 This plugin can initiate and terminate a debugging session by launching your default web browser with the XDEBUG_SESSION_START or XDEBUG_SESSION_STOP parameters. The debug URL is defined in your .sublime-project file like this:
-	
+
 	{
 		"folders":
 		[
@@ -63,6 +63,29 @@ This plugin can initiate and terminate a debugging session by launching your def
 	}
 
 If you don't configure the URL, the plugin will still listen for debugging connections from XDebug, but you will need to trigger XDebug <a href="http://XDebug.org/docs/remote">for a remote session</a>. The IDE Key should be "sublime.xdebug".
+
+## Remote debugging
+
+If you want to use remote debugging, define "path_mappings" in your .sublime-project. You can define multiple mappings in one project like this:
+
+	{
+		"folders":
+		[
+			{
+				"path": "..."
+			},
+		],
+
+		"settings": {
+			"xdebug": {
+				"path_mappings": [
+					[ "/local/path/1", "/remote/path/1" ],
+					[ "/local/path/2", "/remote/path/2" ]
+				]
+		}
+	}
+
+> Also you have to configure communication port (default is 9000) on localhost to be accessible from remote server. One of easy way is using ssh remote forwarding.
 
 ## Gutter icon color
 

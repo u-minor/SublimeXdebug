@@ -219,7 +219,12 @@ class XdebugView(object):
             self.del_breakpoint(row)
 
     def uri(self):
-        return 'file://' + os.path.realpath(self.view.file_name())
+        path = os.path.realpath(self.view.file_name())
+        mappings = get_project_setting('path_mappings')
+        if mappings:
+            for m in mappings:
+                path = path.replace(m[0], m[1])
+        return 'file://' + path
 
     def lines(self, data=None):
         lines = []
@@ -495,6 +500,7 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
             if xdebug_current:
                 xdebug_current.on_selection_modified()
 
+            mappings = get_project_setting('path_mappings')
             protocol.send('stack_get')
             res = protocol.read().firstChild
             result = unicode('')
@@ -504,6 +510,9 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
                     propLevel = child.getAttribute('level')
                     propType = child.getAttribute('type')
                     propFile = child.getAttribute('filename')
+                    if mappings:
+                        for m in mappings:
+                            propFile = propFile.replace(m[1], m[0])
                     propLine = child.getAttribute('lineno')
                     result = result + unicode('{level:>3}: {type:<10} {where:<10} {filename}:{lineno}\n' \
                                               .format(level=propLevel, type=propType, where=propWhere, lineno=propLine, filename=propFile))
@@ -656,6 +665,10 @@ def show_file(window, uri):
         transport, filename = uri.split(':///', 1)  # scheme:///C:/path/file => scheme, C:/path/file
     else:
         transport, filename = uri.split('://', 1)  # scheme:///path/file => scheme, /path/file
+        mappings = get_project_setting('path_mappings')
+        if mappings:
+            for m in mappings:
+                filename = filename.replace(m[1], m[0])
     if transport == 'file' and os.path.exists(filename):
         window = sublime.active_window()
         views = window.views()
